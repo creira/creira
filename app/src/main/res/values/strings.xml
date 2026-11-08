@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">PulseFeed</string>
+    <string name="widget_description">Scan the latest news headlines from your feeds.</string>
+    <string name="widget_header_title">Latest Headlines</string>
+    <string name="widget_empty_text">No cached articles yet. Open PulseFeed to sync feeds!</string>
+    <string name="refresh_feeds">Refresh feeds</string>
+    <string name="notification_channel_name">PulseFeed Daily Recommendations</string>
+    <string name="notification_channel_desc">Daily curated article recommendations from your feeds</string>
+</resources>

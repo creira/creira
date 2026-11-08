@@ -1,0 +1,6 @@
+{
+  "name": "PulseFeed",
+  "description": "Modern Material 3 RSS reader with OPML import, offline article caching, card reading progress, home screen widget, and folding screen support.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

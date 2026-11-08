@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
+    android:minWidth="140dp"
+    android:minHeight="110dp"
+    android:minResizeWidth="140dp"
+    android:minResizeHeight="100dp"
+    android:targetCellWidth="3"
+    android:targetCellHeight="2"
+    android:updatePeriodMillis="1800000"
+    android:description="@string/widget_description"
+    android:previewImage="@drawable/ic_pulsefeed_logo"
+    android:initialLayout="@layout/widget_pulsefeed"
+    android:resizeMode="horizontal|vertical"
+    android:widgetCategory="home_screen" />
