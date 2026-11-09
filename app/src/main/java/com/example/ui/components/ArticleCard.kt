@@ -150,11 +150,12 @@ fun ArticleCard(
                         modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Box(
-                            modifier = Modifier
-                                .size(7.dp)
-                                .clip(CircleShape)
-                                .background(MaterialTheme.colorScheme.primary)
+                        SourceIcon(
+                            iconUrl = null,
+                            fallbackUrl = article.link,
+                            title = article.feedTitle,
+                            size = 14.dp,
+                            shapeRadius = 4.dp
                         )
                         Spacer(modifier = Modifier.width(6.dp))
                         Text(

@@ -251,11 +251,11 @@ fun FeedDrawerContent(
                             .padding(horizontal = 10.dp, vertical = 9.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Box(
-                            modifier = Modifier
-                                .size(8.dp)
-                                .clip(CircleShape)
-                                .background(if (isSelected) MaterialTheme.colorScheme.primary else Color(0xFFFF9100))
+                        SourceIcon(
+                            iconUrl = feed.iconUrl,
+                            fallbackUrl = feed.siteUrl.ifBlank { feed.url },
+                            title = feed.title,
+                            size = 20.dp
                         )
                         Spacer(modifier = Modifier.width(10.dp))
                         Text(

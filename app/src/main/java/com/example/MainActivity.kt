@@ -52,9 +52,20 @@ class MainActivity : ComponentActivity() {
 
     private fun handleIntent(intent: Intent?) {
         if (intent == null) return
-        val openArticleId = intent.getLongExtra("OPEN_ARTICLE_ID", -1L)
+        val rawExtra = intent.extras?.get("OPEN_ARTICLE_ID")
+        var openArticleId = when (rawExtra) {
+            is Long -> rawExtra
+            is Int -> rawExtra.toLong()
+            is String -> rawExtra.toLongOrNull() ?: -1L
+            else -> -1L
+        }
+        if (openArticleId <= 0L && intent.data != null) {
+            openArticleId = intent.data?.lastPathSegment?.toLongOrNull() ?: -1L
+        }
         if (openArticleId > 0) {
             viewModel.openArticleById(openArticleId)
+            intent.removeExtra("OPEN_ARTICLE_ID")
+            intent.data = null
         }
     }
 }

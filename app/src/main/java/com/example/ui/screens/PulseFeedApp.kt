@@ -287,26 +287,28 @@ fun PulseFeedApp(
                                     .weight(1.4f)
                                     .fillMaxHeight()
                             ) {
-                                ReadingView(
-                                    articles = articles,
-                                    currentArticle = activeArticle!!,
-                                    onArticleChanged = { viewModel.openArticle(it) },
-                                    onClose = { viewModel.closeActiveArticle() },
-                                    onToggleBookmark = { viewModel.toggleArticleBookmark(it) },
-                                    onToggleRead = { viewModel.toggleArticleRead(it) },
-                                    onProgressUpdate = { id, progress ->
-                                        viewModel.updateReadingProgress(id, progress)
-                                    },
-                                    showBackButton = true
-                                )
+                                androidx.compose.runtime.key(activeArticle?.id) {
+                                    ReadingView(
+                                        articles = articles,
+                                        currentArticle = activeArticle!!,
+                                        onArticleChanged = { viewModel.openArticle(it) },
+                                        onClose = { viewModel.closeActiveArticle() },
+                                        onToggleBookmark = { viewModel.toggleArticleBookmark(it) },
+                                        onToggleRead = { viewModel.toggleArticleRead(it) },
+                                        onProgressUpdate = { id, progress ->
+                                            viewModel.updateReadingProgress(id, progress)
+                                        },
+                                        showBackButton = true
+                                    )
+                                }
                             }
                         }
                     } else {
-                        // Standard landscape or Foldable: animated full view transition
+                        // Standard landscape or Foldable: animated transition between list and reader
                         AnimatedContent(
-                            targetState = activeArticle,
+                            targetState = activeArticle != null,
                             transitionSpec = {
-                                if (targetState != null) {
+                                if (targetState) {
                                     (slideInHorizontally { width -> width } + fadeIn()).togetherWith(
                                         slideOutHorizontally { width -> -width / 3 } + fadeOut()
                                     )
@@ -320,20 +322,22 @@ fun PulseFeedApp(
                                 .weight(1f)
                                 .fillMaxHeight(),
                             label = "WideArticleNavigation"
-                        ) { currentArticle ->
-                            if (currentArticle != null) {
-                                ReadingView(
-                                    articles = articles,
-                                    currentArticle = currentArticle,
-                                    onArticleChanged = { viewModel.openArticle(it) },
-                                    onClose = { viewModel.closeActiveArticle() },
-                                    onToggleBookmark = { viewModel.toggleArticleBookmark(it) },
-                                    onToggleRead = { viewModel.toggleArticleRead(it) },
-                                    onProgressUpdate = { id, progress ->
-                                        viewModel.updateReadingProgress(id, progress)
-                                    },
-                                    showBackButton = true
-                                )
+                        ) { hasActiveArticle ->
+                            if (hasActiveArticle && activeArticle != null) {
+                                androidx.compose.runtime.key(activeArticle?.id) {
+                                    ReadingView(
+                                        articles = articles,
+                                        currentArticle = activeArticle!!,
+                                        onArticleChanged = { viewModel.openArticle(it) },
+                                        onClose = { viewModel.closeActiveArticle() },
+                                        onToggleBookmark = { viewModel.toggleArticleBookmark(it) },
+                                        onToggleRead = { viewModel.toggleArticleRead(it) },
+                                        onProgressUpdate = { id, progress ->
+                                            viewModel.updateReadingProgress(id, progress)
+                                        },
+                                        showBackButton = true
+                                    )
+                                }
                             } else {
                                 ArticlesListScreen(
                                     articles = articles,
@@ -366,9 +370,9 @@ fun PulseFeedApp(
             } else {
                 // Single Pane Layout for Standard & Folded Screens with smooth animated transitions
                 AnimatedContent(
-                    targetState = activeArticle,
+                    targetState = activeArticle != null,
                     transitionSpec = {
-                        if (targetState != null) {
+                        if (targetState) {
                             (slideInHorizontally { width -> width } + fadeIn()).togetherWith(
                                 slideOutHorizontally { width -> -width / 3 } + fadeOut()
                             )
@@ -379,20 +383,22 @@ fun PulseFeedApp(
                         }
                     },
                     label = "ArticleNavigationTransition"
-                ) { currentArticle ->
-                    if (currentArticle != null) {
-                        ReadingView(
-                            articles = articles,
-                            currentArticle = currentArticle,
-                            onArticleChanged = { viewModel.openArticle(it) },
-                            onClose = { viewModel.closeActiveArticle() },
-                            onToggleBookmark = { viewModel.toggleArticleBookmark(it) },
-                            onToggleRead = { viewModel.toggleArticleRead(it) },
-                            onProgressUpdate = { id, progress ->
-                                viewModel.updateReadingProgress(id, progress)
-                            },
-                            showBackButton = true
-                        )
+                ) { hasActiveArticle ->
+                    if (hasActiveArticle && activeArticle != null) {
+                        androidx.compose.runtime.key(activeArticle?.id) {
+                            ReadingView(
+                                articles = articles,
+                                currentArticle = activeArticle!!,
+                                onArticleChanged = { viewModel.openArticle(it) },
+                                onClose = { viewModel.closeActiveArticle() },
+                                onToggleBookmark = { viewModel.toggleArticleBookmark(it) },
+                                onToggleRead = { viewModel.toggleArticleRead(it) },
+                                onProgressUpdate = { id, progress ->
+                                    viewModel.updateReadingProgress(id, progress)
+                                },
+                                showBackButton = true
+                            )
+                        }
                     } else {
                         ArticlesListScreen(
                             articles = articles,

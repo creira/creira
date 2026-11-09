@@ -100,13 +100,13 @@ fun ReadingView(
     var fontScale by remember { mutableFloatStateOf(1.0f) }
 
     // Resolve articles list to at least contain currentArticle
-    val displayArticles = remember(articles, currentArticle) {
+    val displayArticles = remember(articles, currentArticle.id) {
         if (articles.isEmpty()) listOf(currentArticle)
         else if (articles.none { it.id == currentArticle.id }) listOf(currentArticle) + articles
         else articles
     }
 
-    val initialIndex = remember(displayArticles, currentArticle.id) {
+    val initialIndex = remember(currentArticle.id) {
         displayArticles.indexOfFirst { it.id == currentArticle.id }.coerceAtLeast(0)
     }
 
@@ -115,11 +115,13 @@ fun ReadingView(
         pageCount = { displayArticles.size }
     )
 
-    // Synchronize pager swipe with outside current article
-    LaunchedEffect(pagerState.currentPage) {
-        val articleAtPage = displayArticles.getOrNull(pagerState.currentPage)
-        if (articleAtPage != null && articleAtPage.id != currentArticle.id) {
-            onArticleChanged(articleAtPage)
+    // Synchronize pager swipe with outside current article only when user scrolling settles
+    LaunchedEffect(pagerState.settledPage) {
+        if (!pagerState.isScrollInProgress) {
+            val articleAtPage = displayArticles.getOrNull(pagerState.settledPage)
+            if (articleAtPage != null && articleAtPage.id != currentArticle.id) {
+                onArticleChanged(articleAtPage)
+            }
         }
     }
 
@@ -360,12 +362,24 @@ private fun ArticleScrollableContent(
                     color = MaterialTheme.colorScheme.primaryContainer,
                     contentColor = MaterialTheme.colorScheme.onPrimaryContainer
                 ) {
-                    Text(
-                        text = article.feedTitle.uppercase(),
-                        fontSize = 11.sp,
-                        fontWeight = FontWeight.Bold,
-                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp)
-                    )
+                    Row(
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        SourceIcon(
+                            iconUrl = null,
+                            fallbackUrl = article.link,
+                            title = article.feedTitle,
+                            size = 14.dp,
+                            shapeRadius = 4.dp
+                        )
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Text(
+                            text = article.feedTitle.uppercase(),
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
                 }
 
                 Surface(
@@ -625,6 +639,14 @@ private fun UpNextBottomBanner(
                                 )
                             }
                             Spacer(modifier = Modifier.width(6.dp))
+                            SourceIcon(
+                                iconUrl = null,
+                                fallbackUrl = nextArticle.link,
+                                title = nextArticle.feedTitle,
+                                size = 12.dp,
+                                shapeRadius = 3.dp
+                            )
+                            Spacer(modifier = Modifier.width(4.dp))
                             Text(
                                 text = "${nextArticle.feedTitle} • ${nextArticle.estimatedReadMinutes}m read",
                                 style = MaterialTheme.typography.labelSmall,

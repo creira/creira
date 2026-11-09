@@ -7,9 +7,7 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
-import android.os.Build
 import android.os.Bundle
-import android.util.SizeF
 import android.widget.RemoteViews
 import com.example.MainActivity
 import com.example.R
@@ -24,6 +22,7 @@ class PulseFeedWidgetProvider : AppWidgetProvider() {
         for (appWidgetId in appWidgetIds) {
             updateAppWidget(context, appWidgetManager, appWidgetId)
         }
+        appWidgetManager.notifyAppWidgetViewDataChanged(appWidgetIds, R.id.widget_article_grid)
     }
 
     override fun onAppWidgetOptionsChanged(
@@ -34,6 +33,7 @@ class PulseFeedWidgetProvider : AppWidgetProvider() {
     ) {
         super.onAppWidgetOptionsChanged(context, appWidgetManager, appWidgetId, newOptions)
         updateAppWidget(context, appWidgetManager, appWidgetId)
+        appWidgetManager.notifyAppWidgetViewDataChanged(appWidgetId, R.id.widget_article_grid)
     }
 
     override fun onReceive(context: Context, intent: Intent) {
@@ -49,39 +49,34 @@ class PulseFeedWidgetProvider : AppWidgetProvider() {
 
     companion object {
         const val ACTION_REFRESH_WIDGET = "com.example.pulsefeed.ACTION_REFRESH_WIDGET"
+        const val ACTION_OPEN_ARTICLE = "com.example.pulsefeed.ACTION_OPEN_ARTICLE"
+        const val EXTRA_OPEN_ARTICLE_ID = "OPEN_ARTICLE_ID"
 
         fun updateAppWidget(context: Context, appWidgetManager: AppWidgetManager, appWidgetId: Int) {
             val options = appWidgetManager.getAppWidgetOptions(appWidgetId)
-            val minWidth = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH, 0)
+            val minWidth = options?.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH, 0) ?: 0
 
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                // Android 12+ dynamic responsive layout sizing:
-                // Allows launcher to fluidly transition cards from 1 column up to 4 columns as widget grows/shrinks
-                val viewMapping = mapOf(
-                    SizeF(140f, 100f) to buildCardGridViews(context, appWidgetId, R.layout.widget_pulsefeed_1col),
-                    SizeF(260f, 100f) to buildCardGridViews(context, appWidgetId, R.layout.widget_pulsefeed_2col),
-                    SizeF(480f, 100f) to buildCardGridViews(context, appWidgetId, R.layout.widget_pulsefeed_3col),
-                    SizeF(680f, 100f) to buildCardGridViews(context, appWidgetId, R.layout.widget_pulsefeed_4col)
-                )
-                appWidgetManager.updateAppWidget(appWidgetId, RemoteViews(viewMapping))
-            } else {
-                // Fallback for pre-Android 12 based on minWidth options
-                val layoutRes = when {
-                    minWidth >= 680 -> R.layout.widget_pulsefeed_4col
-                    minWidth >= 480 -> R.layout.widget_pulsefeed_3col
-                    minWidth >= 260 -> R.layout.widget_pulsefeed_2col
-                    else -> R.layout.widget_pulsefeed_1col
-                }
-                val views = buildCardGridViews(context, appWidgetId, layoutRes)
-                appWidgetManager.updateAppWidget(appWidgetId, views)
+            // Responsive layout selection based on current width:
+            // Grows from 1 column up to 4 columns as widget is widened
+            val layoutRes = when {
+                minWidth >= 680 -> R.layout.widget_pulsefeed_4col
+                minWidth >= 480 -> R.layout.widget_pulsefeed_3col
+                minWidth >= 260 -> R.layout.widget_pulsefeed_2col
+                else -> R.layout.widget_pulsefeed_1col
             }
+
+            val views = buildCardGridViews(context, appWidgetId, layoutRes)
+            appWidgetManager.updateAppWidget(appWidgetId, views)
         }
 
         private fun buildCardGridViews(context: Context, appWidgetId: Int, layoutId: Int): RemoteViews {
             val views = RemoteViews(context.packageName, layoutId)
 
             // Header click opens app
-            val appIntent = Intent(context, MainActivity::class.java)
+            val appIntent = Intent(context, MainActivity::class.java).apply {
+                action = "com.example.pulsefeed.ACTION_MAIN"
+                flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP
+            }
             val appPendingIntent = PendingIntent.getActivity(
                 context,
                 0,
@@ -105,13 +100,16 @@ class PulseFeedWidgetProvider : AppWidgetProvider() {
             // Set up RemoteViewsService intent for grid of cards
             val serviceIntent = Intent(context, PulseFeedWidgetService::class.java).apply {
                 putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId)
-                data = Uri.parse(toUri(Intent.URI_INTENT_SCHEME))
+                data = Uri.parse("content://com.example.pulsefeed/widget/$appWidgetId")
             }
             views.setRemoteAdapter(R.id.widget_article_grid, serviceIntent)
             views.setEmptyView(R.id.widget_article_grid, R.id.widget_empty_view)
 
-            // Card item click template
-            val clickIntent = Intent(context, MainActivity::class.java)
+            // Card item click template for opening individual articles
+            val clickIntent = Intent(context, MainActivity::class.java).apply {
+                action = ACTION_OPEN_ARTICLE
+                flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP
+            }
             val clickPendingIntent = PendingIntent.getActivity(
                 context,
                 2,
@@ -128,6 +126,9 @@ class PulseFeedWidgetProvider : AppWidgetProvider() {
             val ids = appWidgetManager.getAppWidgetIds(
                 ComponentName(context, PulseFeedWidgetProvider::class.java)
             )
+            for (id in ids) {
+                updateAppWidget(context, appWidgetManager, id)
+            }
             appWidgetManager.notifyAppWidgetViewDataChanged(ids, R.id.widget_article_grid)
         }
     }

@@ -21,6 +21,9 @@ interface ArticleDao {
     @Query("SELECT * FROM articles WHERE isRead = 0 ORDER BY CASE WHEN pubDateTimestamp > 0 THEN pubDateTimestamp ELSE cachedAt END DESC, id DESC")
     fun getUnreadArticlesFlow(): Flow<List<ArticleEntity>>
 
+    @Query("SELECT * FROM articles WHERE isRead = 0 ORDER BY CASE WHEN pubDateTimestamp > 0 THEN pubDateTimestamp ELSE cachedAt END DESC, id DESC")
+    suspend fun getAllUnreadArticles(): List<ArticleEntity>
+
     @Query("SELECT * FROM articles WHERE id = :id LIMIT 1")
     suspend fun getArticleById(id: Long): ArticleEntity?
 

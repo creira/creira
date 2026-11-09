@@ -1,25 +1,42 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/widget_item_root"
     android:layout_width="match_parent"
-    android:layout_height="125dp"
+    android:layout_height="140dp"
     android:layout_margin="4dp"
-    android:background="@drawable/widget_card_bg"
-    android:padding="10dp">
+    android:background="@drawable/widget_card_bg">
 
-    <!-- Top Row: Feed badge pill + Reading time -->
-    <LinearLayout
-        android:id="@+id/widget_item_header_row"
+    <!-- 1. Background Article Graphic -->
+    <ImageView
+        android:id="@+id/widget_item_image"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        android:gravity="center_vertical"
-        android:orientation="horizontal">
+        android:layout_height="match_parent"
+        android:contentDescription="@null"
+        android:scaleType="centerCrop"
+        android:src="@drawable/widget_image_placeholder" />
 
+    <!-- 2. Darkening Scrim Gradient for text legibility -->
+    <ImageView
+        android:id="@+id/widget_item_scrim"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@drawable/widget_card_scrim"
+        android:contentDescription="@null" />
+
+    <!-- 3. Foreground Content: Badges on top, headline at bottom -->
+    <RelativeLayout
+        android:id="@+id/widget_item_content"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:padding="8dp">
+
+        <!-- Top Left: Feed badge pill -->
         <TextView
             android:id="@+id/widget_item_feed"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentTop="true"
             android:background="@drawable/widget_feed_pill"
             android:ellipsize="end"
             android:maxLines="1"
@@ -31,30 +48,33 @@
             android:textSize="9sp"
             android:textStyle="bold" />
 
-        <View
-            android:layout_width="0dp"
-            android:layout_height="1dp"
-            android:layout_weight="1" />
-
+        <!-- Top Right: Reading time badge pill -->
         <TextView
             android:id="@+id/widget_item_time"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textColor="#A0ABC0"
-            android:textSize="10sp" />
-    </LinearLayout>
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentTop="true"
+            android:background="@drawable/widget_time_pill"
+            android:paddingStart="5dp"
+            android:paddingTop="2dp"
+            android:paddingEnd="5dp"
+            android:paddingBottom="2dp"
+            android:textColor="#D1D5DB"
+            android:textSize="9sp" />
 
-    <!-- Bottom: Headline grounded directly on the card -->
-    <TextView
-        android:id="@+id/widget_item_headline"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_marginTop="6dp"
-        android:ellipsize="end"
-        android:maxLines="3"
-        android:textColor="#FFFFFF"
-        android:textSize="13sp"
-        android:textStyle="bold" />
+        <!-- Bottom: Headline grounded directly on the card -->
+        <TextView
+            android:id="@+id/widget_item_headline"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:ellipsize="end"
+            android:maxLines="3"
+            android:textColor="#FFFFFF"
+            android:textSize="12sp"
+            android:textStyle="bold" />
 
-</RelativeLayout>
+    </RelativeLayout>
+
+</FrameLayout>

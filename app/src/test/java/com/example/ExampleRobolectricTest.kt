@@ -79,4 +79,26 @@ class ExampleRobolectricTest {
 
         assertEquals("Same UTC instant should match timestamp", parsedRfc, parsedIso)
     }
+
+    @Test
+    fun `test widget item fill-in intent and URI parsing`() {
+        val articleId = 42L
+        val fillInIntent = android.content.Intent().apply {
+            action = com.example.widget.PulseFeedWidgetProvider.ACTION_OPEN_ARTICLE
+            putExtra(com.example.widget.PulseFeedWidgetProvider.EXTRA_OPEN_ARTICLE_ID, articleId)
+            data = android.net.Uri.parse("pulsefeed://article/$articleId")
+        }
+
+        assertEquals(com.example.widget.PulseFeedWidgetProvider.ACTION_OPEN_ARTICLE, fillInIntent.action)
+        assertEquals(articleId, fillInIntent.getLongExtra("OPEN_ARTICLE_ID", -1L))
+        assertEquals(articleId, fillInIntent.data?.lastPathSegment?.toLongOrNull())
+    }
+
+    @Test
+    fun `test extract favicon from URL`() {
+        val siteUrl = "https://www.theverge.com/tech"
+        val favicon = RssParser.extractFavicon(siteUrl)
+        assertTrue(favicon.contains("www.theverge.com"))
+        assertTrue(favicon.startsWith("https://www.google.com/s2/favicons"))
+    }
 }

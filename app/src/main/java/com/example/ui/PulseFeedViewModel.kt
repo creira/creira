@@ -128,7 +128,17 @@ class PulseFeedViewModel(application: Application) : AndroidViewModel(applicatio
 
     fun openArticleById(id: Long) {
         viewModelScope.launch {
-            val article = repository.getArticleById(id)
+            var article = repository.getArticleById(id)
+            if (article == null) {
+                // If app is launched cold from a widget click while DB is initializing,
+                // retry briefly to allow preset feeds or database initialization to complete
+                var retries = 0
+                while (article == null && retries < 15) {
+                    kotlinx.coroutines.delay(200)
+                    article = repository.getArticleById(id)
+                    retries++
+                }
+            }
             if (article != null) {
                 _activeArticle.value = article
             }
